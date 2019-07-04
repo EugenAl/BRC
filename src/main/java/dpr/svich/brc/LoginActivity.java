@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private class AsyncSignUp extends AsyncTask<Void, Void, Boolean>{
+    private class AsyncSignUp extends AsyncTask<Void, Void, Integer>{
         ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
 
         @Override
@@ -57,8 +57,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
-            boolean succes;
+        protected Integer doInBackground(Void... voids) {
+            Integer responseCode = 199;
             try{
                 String login = loginET.getText().toString();
                 String password = passET.getText().toString();
@@ -68,16 +68,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestProperty("Authorization", basicAuth);
                 connection.connect();
-                succes = true;
+                responseCode = connection.getResponseCode();
             } catch (Exception e){
                 e.printStackTrace();
-                succes = false;
             }
-            return succes;
+            return responseCode;
         }
 
         @Override
-        protected void onPostExecute(Boolean aVoid) {
+        protected void onPostExecute(Integer aVoid) {
             super.onPostExecute(aVoid);
 
             progressDialog.dismiss();
@@ -85,12 +84,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public void signUpProgress(boolean state){
-        if(state){
-            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Ohh, something went wrong",
-                    Toast.LENGTH_SHORT).show();
+    public void signUpProgress(Integer state){
+        switch (state){
+            case 200:
+                Toast.makeText(this, "Success, code 200", Toast.LENGTH_LONG).show();
+                break;
+            case 401:
+                Toast.makeText(this, "Unauthorized", Toast.LENGTH_LONG).show();
+                break;
+                default:
+                    Toast.makeText(this, "Connect with code "+state,
+                            Toast.LENGTH_LONG).show();
         }
     }
 }
